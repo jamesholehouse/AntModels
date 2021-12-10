@@ -5,15 +5,13 @@ module BDMAnalytic
     using Plots, Parameters, LinearAlgebra, Distributions, StatsBase, DoubleFloats
 
     """
-    Define the Analytic Ising Model struct
+    Define the binary decision model struct.
     """
     @with_kw struct BDM
-        ϵ::Float64 = 1.0;
-        μ::Float64 = 1.0;
-        N::Int64 = 100;
-        pars::Vector{Float64} = [ϵ ,μ ,N];
-        A::Matrix{Float64} = make_TRM(pars, N)
-        λ::Array{Complex{Double64}} = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1]#GetEigVals(A)
+        N::Int64 = 100
+        pars::Vector{Float64}; # can be [ϵ,μ], [ϵ1,ϵ2,μ] or [ϵ1,ϵ2,μ1,μ2]
+        A::Matrix{Float64} = make_TRM(pars, N);
+        λ::Array{Complex{Double64}} = GetEigVals(A,pars,N);
         q_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoQ(pars,N,λ[j]) for j in 1:N+1]
         p_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoP(pars,N,λ[j]) for j in 1:N+1]
         den_prod::Vector{Complex{Double64}} = [prod([λ[i]-λ[j] for j in filter!(e->e≠i,[j for j in 1:N+1])]) for i in 1:N+1]
@@ -24,26 +22,47 @@ module BDMAnalytic
     """
     Define rate function for N₊ prod
     """
-    function r1(pars::Vector{Float64}, N::Int64, n::Int64)
-        ϵ = pars[1];
-        μ = pars[2];
-        N = pars[3];
-        return convert(Double64,γ*(N-n)*(1+exp(-β*G))^-1)::Double64
+    function a(pars::Vector{Float64}, N::Int64, n::Int64)
+        if Length(pars)==2
+            ϵ = pars[1];
+            μ = pars[2];
+            N = pars[3];
+            return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)(N-(n-1))/(N-1))::Double64
+        elseif Length(pars)==3
+            ϵ1 = pars[1];
+            μ = pars[3];
+            N = pars[4];
+            return convert(Double64,(N-(n-1))*ϵ1+μ*(n-1)(N-(n-1))/(N-1))::Double64
+        elseif Length(pars)==4
+            ϵ1 = pars[1];
+            μ1 = pars[3];
+            N = pars[5];
+            return convert(Double64,(N-(n-1))*ϵ1+μ1*(n-1)(N-(n-1))/(N-1))::Double64
+        else
+            error("Length of pars must be 2, 3 or 4.")
+        end
     end
-    # rescaled definition in solution
-    a(pars,N,n) = r1(pars,N,n-1);
 
     """
     Define rate function for N₋ prod
     """
-    function r2(pars::Vector{Float64}, N::Int64, n::Int64)
-        γ = pars[1];
-        β = pars[5];
-        G = Gain(1, n, pars, N)
-        return convert(Double64,γ*n*(1+exp(-β*G))^-1)::Double64
+    function b(pars::Vector{Float64}, N::Int64, n::Int64)
+        if Length(pars)==2
+            ϵ = pars[1];
+            μ = pars[2];
+            return convert(Double64,(n+1)*ϵ+μ*(n+1)(N-(n+1))/(N-1))::Double64
+        elseif Length(pars)==3
+            ϵ2 = pars[2];
+            μ = pars[3];
+            return convert(Double64,(n+1)*ϵ2+μ*(n+1)(N-(n+1))/(N-1))::Double64
+        elseif Length(pars)==4
+            ϵ2 = pars[2];
+            μ2 = pars[4];
+            return convert(Double64,(n+1)*ϵ2+μ1*(n+1)(N-(n+1))/(N-1))::Double64
+        else
+            error("Length of pars must be 2, 3 or 4.")
+        end
     end
-    # rescaled definition in solution
-    b(pars,N,n) = r2(pars,N,n+1);
 
     """
     Make the transition rate matrix
@@ -53,7 +72,7 @@ module BDMAnalytic
         for i in 1:size(A)[1]
             for j in 1:size(A)[2]
                 if i == 1 && j == 1
-                    A[1,1] = - a(pars,N,1)
+                    A[1,1] = -a(pars,N,1)
                 elseif i == j && i>1
                     A[i,i] = -(a(pars,N,i)+b(pars,N,i-2))
                 elseif i == j+1
@@ -71,12 +90,26 @@ module BDMAnalytic
     """
     Get eigenvalues
     """
-    function GetEigVals(A::Matrix{Float64})
-        λ = convert(Array{Complex{Double64}}, reverse(eigvals(A)));
-        if λ[1] == λ[2] # if get repeated zero eigenvalues from solver manually separate.
-            λ[1] = 0.0 + (1E-30)im; λ[2] = 0.0 - (1E-30)im;
-        end
-        return λ::Array{Complex{Double64}}
+    function GetEigVals(A::Matrix{Float64},pars::Vector{Float64},N::Int64)
+        if Length(pars)==2
+            ϵ = pars[1];
+            μ = pars[2];
+            λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
+            return convert(Array{Complex{Double64}},λ)
+        elseif Length(pars)==3
+            ϵ1 = pars[1];
+            ϵ2 = pars[2]
+            μ = pars[3];
+            λ = [-(m-1)*(ϵ1+ϵ2+(m-2)μ/(N-1)) for m in 1:N+1];
+            return convert(Array{Complex{Double64}},λ)
+        elseif Length(pars)==4
+            λ = convert(Array{Complex{Double64}}, reverse(eigvals(A)));
+            if λ[1] == λ[2] # if get repeated zero eigenvalues from solver manually separate.
+                λ[1] = 0.0 + (1E-30)im; λ[2] = 0.0 - (1E-30)im;
+            end
+            return λ::Array{Complex{Double64}}
+        else
+            error("Length of pars must be 2, 3 or 4.")
     end
 
     """
