@@ -1,6 +1,8 @@
 # AntModels
 Code to produce probability distributions for binary decision models of the type inspired by Kirman and Moran, as well as stochastic simulations.
 
+To understand how to use the code see the notebook `How-to-Analytic-Binary-Decisions`.
+
 # Julia packages
 
 To run the notebook `How-to-Analytic-Binary-Decisions` one needs to install several julia packages through the Julia package manager. Run
