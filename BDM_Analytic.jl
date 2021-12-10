@@ -20,42 +20,42 @@ module BDMAnalytic
     end
 
     """
-    Define rate function for N₊ prod
+    Define rate function for ants going to the rh food source
     """
     function a(pars::Vector{Float64}, N::Int64, n::Int64)
         if length(pars)==2
             ϵ = pars[1];
             μ = pars[2];
-            return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)(N-(n-1))/(N-1))::Double64
+            return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))/(N-1))::Double64
         elseif length(pars)==3
             ϵ1 = pars[1];
             μ = pars[3];
-            return convert(Double64,(N-(n-1))*ϵ1+μ*(n-1)(N-(n-1))/(N-1))::Double64
+            return convert(Double64,(N-(n-1))*ϵ1+μ*(n-1)*(N-(n-1))/(N-1))::Double64
         elseif length(pars)==4
             ϵ1 = pars[1];
             μ1 = pars[3];
-            return convert(Double64,(N-(n-1))*ϵ1+μ1*(n-1)(N-(n-1))/(N-1))::Double64
+            return convert(Double64,(N-(n-1))*ϵ1+μ1*(n-1)*(N-(n-1))/(N-1))::Double64
         else
             error("length of pars must be 2, 3 or 4.")
         end
     end
 
     """
-    Define rate function for N₋ prod
+    Define rate function for ants going to the lh food source
     """
     function b(pars::Vector{Float64}, N::Int64, n::Int64)
         if length(pars)==2
             ϵ = pars[1];
             μ = pars[2];
-            return convert(Double64,(n+1)*ϵ+μ*(n+1)(N-(n+1))/(N-1))::Double64
+            return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
         elseif length(pars)==3
             ϵ2 = pars[2];
             μ = pars[3];
-            return convert(Double64,(n+1)*ϵ2+μ*(n+1)(N-(n+1))/(N-1))::Double64
+            return convert(Double64,(n+1)*ϵ2+μ*(n+1)*(N-(n+1))/(N-1))::Double64
         elseif length(pars)==4
             ϵ2 = pars[2];
             μ2 = pars[4];
-            return convert(Double64,(n+1)*ϵ2+μ1*(n+1)(N-(n+1))/(N-1))::Double64
+            return convert(Double64,(n+1)*ϵ2+μ1*(n+1)*(N-(n+1))/(N-1))::Double64
         else
             error("length of pars must be 2, 3 or 4.")
         end
