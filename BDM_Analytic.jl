@@ -26,17 +26,14 @@ module BDMAnalytic
         if length(pars)==2
             ϵ = pars[1];
             μ = pars[2];
-            N = pars[3];
             return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)(N-(n-1))/(N-1))::Double64
         elseif length(pars)==3
             ϵ1 = pars[1];
             μ = pars[3];
-            N = pars[4];
             return convert(Double64,(N-(n-1))*ϵ1+μ*(n-1)(N-(n-1))/(N-1))::Double64
         elseif length(pars)==4
             ϵ1 = pars[1];
             μ1 = pars[3];
-            N = pars[5];
             return convert(Double64,(N-(n-1))*ϵ1+μ1*(n-1)(N-(n-1))/(N-1))::Double64
         else
             error("length of pars must be 2, 3 or 4.")
