@@ -36,7 +36,7 @@ module BinaryDecSSA
     Propensities.
     """
     function props(n::Int64, BD::BinDecMod)
-        @unpack pars = BD;
+        @unpack pars, N = BD;
         props = zeros(2) # propensity vector.
         if length(pars)==2
             ϵ = pars[1];
