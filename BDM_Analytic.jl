@@ -5,7 +5,9 @@ module BDMAnalytic
     using Plots, Parameters, LinearAlgebra, Distributions, StatsBase, DoubleFloats
 
     """
-    Define the binary decision model struct.
+    Define the binary decision model struct:
+        * N: the number of agents in the system.
+        * pars: the parameters of the system. Note the length of pars specifies the model type, can be [ϵ,μ], [ϵ1,ϵ2,μ] or [ϵ1,ϵ2,μ1,μ2].
     """
     @with_kw struct BDM
         N::Int64 = 100;
@@ -142,7 +144,7 @@ module BDMAnalytic
     end
 
     """
-    Define P(m,t|m₀)
+    Define P(x,t|x₀)
     """
     function pm(t::Float64, BD::BDM, m::Int64, m₀::Int64)
         @unpack λ, pars, N, As, Bs, q_arr, p_arr, den_prod = BD
