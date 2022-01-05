@@ -104,7 +104,7 @@ module BDMAnalytic
             elseif length(pars)==2
                 ϵ = pars[1];
                 μ = pars[2];
-                return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))*(1+(n+1))/(N-1))/(N-1))::Double64
+                return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))*(1+(n+1)/(N-1))/(N-1))::Double64
             else
                 error("length of pars must be 1 or 2 for the voter models")
             end
