@@ -174,7 +174,7 @@ module BDMAnalytic
             if length(pars)==1
                 p₀ = pars[1];
                 ϵ = p₀/(2*N);
-                μ = (1-p₀)(N-1)/N^2;
+                μ = (1-p₀)*(N-1)/N^2;
                 λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
                 return convert(Array{Complex{Double64}},λ)
             elseif length(pars)==2
