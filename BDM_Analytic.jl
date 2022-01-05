@@ -15,8 +15,8 @@ module BDMAnalytic
         model_type::String = "ant" # be also be "voter" or "brock"
         A::Matrix{Float64} = make_TRM(pars, N, model_type);
         λ::Array{Complex{Double64}} = GetEigVals(A,pars,N,model_type);
-        q_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoQ(pars,N,λ[j]) for j in 1:N+1];
-        p_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoP(pars,N,λ[j]) for j in 1:N+1];
+        q_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoQ(pars,N,λ[j],model_type) for j in 1:N+1];
+        p_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoP(pars,N,λ[j],model_type) for j in 1:N+1];
         den_prod::Vector{Complex{Double64}} = [prod([λ[i]-λ[j] for j in filter!(e->e≠i,[j for j in 1:N+1])]) for i in 1:N+1];
         As::Vector{Double64} = [a(pars,N,j,model_type) for j in 1:N];
         Bs::Vector{Double64} = [b(pars,N,j,model_type) for j in 0:N-1];
@@ -203,11 +203,11 @@ module BDMAnalytic
     """
     Get the p orthogonal polynomials
     """
-    function GetOrthoP(pars::Vector{Float64}, N::Int64, λᵢ::Complex{Double64})
+    function GetOrthoP(pars::Vector{Float64}, N::Int64, λᵢ::Complex{Double64},model_type::String)
         p = Array{Complex{Double64},1}(undef, N+1);
-        p[1] = 1.0; p[2] = λᵢ+a(pars,N,1);
+        p[1] = 1.0; p[2] = λᵢ+a(pars,N,1,model_type);
         for i in 3:N+1
-            p[i] = (λᵢ+a(pars,N,i-1)+b(pars,N,i-3))*p[i-1] - b(pars,N,i-3)*a(pars,N,i-2)*p[i-2]
+            p[i] = (λᵢ+a(pars,N,i-1,model_type)+b(pars,N,i-3,model_type))*p[i-1] - b(pars,N,i-3,model_type)*a(pars,N,i-2,model_type)*p[i-2]
         end
         return p::Vector{Complex{Double64}}
     end
@@ -215,11 +215,11 @@ module BDMAnalytic
     """
     Get the q orthogonal polynomials
     """
-    function GetOrthoQ(pars::Vector{Float64}, N::Int64, λᵢ::Complex{Double64})
+    function GetOrthoQ(pars::Vector{Float64}, N::Int64, λᵢ::Complex{Double64},model_type::String)
         q = Array{Complex{Double64},1}(undef, N+3);
-        q[N+3] = 1.0; q[N+2] = λᵢ + b(pars,N,N-1);
+        q[N+3] = 1.0; q[N+2] = λᵢ + b(pars,N,N-1,model_type);
         for i in reverse([j for j in 3:N+1])
-            q[i] = (λᵢ + a(pars,N,i-1)+b(pars,N,i-3))*q[i+1] - b(pars,N,i-2)*a(pars,N,i-1)*q[i+2]
+            q[i] = (λᵢ + a(pars,N,i-1,model_type)+b(pars,N,i-3,model_type))*q[i+1] - b(pars,N,i-2,model_type)*a(pars,N,i-1,model_type)*q[i+2]
         end
         return q::Vector{Complex{Double64}}
     end
