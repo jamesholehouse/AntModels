@@ -45,8 +45,11 @@ module BDMAnalytic
         elseif model_type == "voter"
             if length(pars)==1
                 p₀ = pars[1];
+                if p₀ > 1 || p₀ < 0
+                    error("p₀ must be between 0 and 1.")
+                end
                 ϵ = p₀/(2*N);
-                μ = (1-p₀)*(N-1)/N^2;
+                μ = (1-p₀)*(N-1)/(2*N^2);
                 return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))/(N-1))::Double64
             elseif length(pars)==2
                 ϵ = pars[1];
@@ -178,10 +181,11 @@ module BDMAnalytic
                 λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
                 return convert(Array{Complex{Double64}},λ)
             elseif length(pars)==2
-                ϵ = pars[1];
-                μ = pars[2];
-                λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
-                return convert(Array{Complex{Double64}},λ)
+                λ = convert(Array{Complex{Double64}}, reverse(eigvals(A)));
+                if λ[1] == λ[2] # if get repeated zero eigenvalues from solver manually separate.
+                    λ[1] = 0.0 + (1E-30)im; λ[2] = 0.0 - (1E-30)im;
+                end
+                return λ::Array{Complex{Double64}}
             else
                 error("length of pars must be 1 or 2 for voter models")
             end
