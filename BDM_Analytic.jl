@@ -149,11 +149,11 @@ module BDMAnalytic
     function pm(t::Float64, BD::BDM, m::Int64, m₀::Int64)
         @unpack λ, pars, N, As, Bs, q_arr, p_arr, den_prod = BD
         if m<m₀
-            return prod(Bs[m+1:m₀])*sum([sum_elems(λ[i], t, m, m₀, pars, N, p_arr[i], q_arr[i], den_prod[i]) for i in 1:N+1])::Complex{Double64}
+            return prod(Bs[m+1:m₀])*sum([sum_elems(λ[i], t, m, m₀, pars, N, p_arr[i], q_arr[i], den_prod[i]) for i in 1:N+1]).*N::Complex{Double64}
         elseif m==m₀
-            return sum([sum_elems(λ[i], t, m, m, pars, N, p_arr[i], q_arr[i], den_prod[i]) for i in 1:N+1])::Complex{Double64}
+            return sum([sum_elems(λ[i], t, m, m, pars, N, p_arr[i], q_arr[i], den_prod[i]) for i in 1:N+1]).*N::Complex{Double64}
         else
-            return prod(As[m₀+1:m])*sum([sum_elems(λ[i], t, m₀, m, pars, N, p_arr[i], q_arr[i], den_prod[i]) for i in 1:N+1])::Complex{Double64}
+            return prod(As[m₀+1:m])*sum([sum_elems(λ[i], t, m₀, m, pars, N, p_arr[i], q_arr[i], den_prod[i]) for i in 1:N+1]).*N::Complex{Double64}
         end
     end
 
