@@ -13,7 +13,7 @@ module BDMAnalytic
         N::Int64 = 100;
         pars::Vector{Float64}; # can be [ϵ,μ], [ϵ1,ϵ2,μ] or [ϵ1,ϵ2,μ1,μ2]
         model_type::String = "ant" # be also be "voter" or "brock"
-        A::Matrix{Float64} = make_TRM(pars, N);
+        A::Matrix{Float64} = make_TRM(pars, N, model_type);
         λ::Array{Complex{Double64}} = GetEigVals(A,pars,N,model_type);
         q_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoQ(pars,N,λ[j]) for j in 1:N+1];
         p_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoP(pars,N,λ[j]) for j in 1:N+1];
@@ -125,18 +125,18 @@ module BDMAnalytic
     """
     Make the transition rate matrix
     """
-    function make_TRM(pars::Vector{Float64}, N::Int64)
+    function make_TRM(pars::Vector{Float64}, N::Int64, model_type::String)
         A = zeros(N+1, N+1);
         for i in 1:size(A)[1]
             for j in 1:size(A)[2]
                 if i == 1 && j == 1
-                    A[1,1] = -a(pars,N,1)
+                    A[1,1] = -a(pars,N,1, model_type)
                 elseif i == j && i>1
-                    A[i,i] = -(a(pars,N,i)+b(pars,N,i-2))
+                    A[i,i] = -(a(pars,N,i, model_type)+b(pars,N,i-2, model_type))
                 elseif i == j+1
-                    A[i,j] = a(pars,N,j)
+                    A[i,j] = a(pars,N,j, model_type)
                 elseif i == j-1
-                    A[i,j] = b(pars,N,i-1)
+                    A[i,j] = b(pars,N,i-1, model_type)
                 else
                     continue
                 end
