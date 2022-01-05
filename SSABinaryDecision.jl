@@ -144,7 +144,7 @@ module BinaryDecSSA
         mod_bins = LinRange(-1.0-(1/N),1.0+(1/N),N+2);
         mid_pts = LinRange(-1.0,1.0,N+1);
         bin_vals = normalize(fit(Histogram, ns[:,T], mod_bins), mode=:probability).weights;
-        return (mid_pts, bin_vals)
+        return (mid_pts, bin_vals.*N)
     end
 
 end # module end
