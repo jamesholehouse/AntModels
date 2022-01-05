@@ -12,54 +12,113 @@ module BDMAnalytic
     @with_kw struct BDM
         N::Int64 = 100;
         pars::Vector{Float64}; # can be [ϵ,μ], [ϵ1,ϵ2,μ] or [ϵ1,ϵ2,μ1,μ2]
+        model_type::String = "ant" # be also be "voter" or "brock"
         A::Matrix{Float64} = make_TRM(pars, N);
-        λ::Array{Complex{Double64}} = GetEigVals(A,pars,N);
+        λ::Array{Complex{Double64}} = GetEigVals(A,pars,N,model_type);
         q_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoQ(pars,N,λ[j]) for j in 1:N+1];
         p_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoP(pars,N,λ[j]) for j in 1:N+1];
         den_prod::Vector{Complex{Double64}} = [prod([λ[i]-λ[j] for j in filter!(e->e≠i,[j for j in 1:N+1])]) for i in 1:N+1];
-        As::Vector{Double64} = [a(pars,N,j) for j in 1:N];
+        As::Vector{Double64} = [a(pars,N,j,model_type) for j in 1:N];
         Bs::Vector{Double64} = [b(pars,N,j) for j in 0:N-1];
     end
 
     """
     Define rate function for ants going to the rh food source
     """
-    function a(pars::Vector{Float64}, N::Int64, n::Int64)
-        if length(pars)==2
-            ϵ = pars[1];
-            μ = pars[2];
-            return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))/(N-1))::Double64
-        elseif length(pars)==3
-            ϵ1 = pars[1];
-            μ = pars[3];
-            return convert(Double64,(N-(n-1))*ϵ1+μ*(n-1)*(N-(n-1))/(N-1))::Double64
-        elseif length(pars)==4
-            ϵ1 = pars[1];
-            μ1 = pars[3];
-            return convert(Double64,(N-(n-1))*ϵ1+μ1*(n-1)*(N-(n-1))/(N-1))::Double64
+    function a(pars::Vector{Float64}, N::Int64, n::Int64, model_type::String)
+        if model_type == "ant"
+            if length(pars)==2
+                ϵ = pars[1];
+                μ = pars[2];
+                return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))/(N-1))::Double64
+            elseif length(pars)==3
+                ϵ1 = pars[1];
+                μ = pars[3];
+                return convert(Double64,(N-(n-1))*ϵ1+μ*(n-1)*(N-(n-1))/(N-1))::Double64
+            elseif length(pars)==4
+                ϵ1 = pars[1];
+                μ1 = pars[3];
+                return convert(Double64,(N-(n-1))*ϵ1+μ1*(n-1)*(N-(n-1))/(N-1))::Double64
+            else
+                error("length of pars must be 2, 3 or 4.")
+            end
+        elseif model_type == "voter"
+            if length(pars)==1
+                p₀ = pars[1];
+                ϵ = p₀/(2*N);
+                μ = (1-p₀)(N-1)/N^2;
+                return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))/(N-1))::Double64
+            elseif length(pars)==2
+                ϵ = pars[1];
+                μ = pars[2];
+                return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))*(1+(N-(n-1))/(N-1))/(N-1))::Double64
+            else
+                error("length of pars must be 1 or 2 for the voter models")
+            end
+        elseif model_type == "brock"
+            if length(pars)==5
+                α = pars[1];
+                β = pars[2];
+                γ = pars[3];
+                F = pars[4];
+                J = pars[5];
+                mn = (2*(n-1)-N)/N;
+                return convert(Double64,(N-(n-1))*γ/(1+exp(-β*(F+J*(α+1)*mn))))
+            else
+                error("length of pars must be 5 for the brock and durlauf model")
+            end
         else
-            error("length of pars must be 2, 3 or 4.")
+            error("chosen model type is not recognised")
         end
     end
 
     """
     Define rate function for ants going to the lh food source
     """
-    function b(pars::Vector{Float64}, N::Int64, n::Int64)
-        if length(pars)==2
-            ϵ = pars[1];
-            μ = pars[2];
-            return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
-        elseif length(pars)==3
-            ϵ2 = pars[2];
-            μ = pars[3];
-            return convert(Double64,(n+1)*ϵ2+μ*(n+1)*(N-(n+1))/(N-1))::Double64
-        elseif length(pars)==4
-            ϵ2 = pars[2];
-            μ2 = pars[4];
-            return convert(Double64,(n+1)*ϵ2+μ2*(n+1)*(N-(n+1))/(N-1))::Double64
+    function b(pars::Vector{Float64}, N::Int64, n::Int64, model_type::String)
+        if model_type == "ant"
+            if length(pars)==2
+                ϵ = pars[1];
+                μ = pars[2];
+                return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
+            elseif length(pars)==3
+                ϵ2 = pars[2];
+                μ = pars[3];
+                return convert(Double64,(n+1)*ϵ2+μ*(n+1)*(N-(n+1))/(N-1))::Double64
+            elseif length(pars)==4
+                ϵ2 = pars[2];
+                μ2 = pars[4];
+                return convert(Double64,(n+1)*ϵ2+μ2*(n+1)*(N-(n+1))/(N-1))::Double64
+            else
+                error("length of pars must be 2, 3 or 4.")
+            end
+        elseif model_type == "voter"
+            if length(pars)==1
+                p₀ = pars[1];
+                ϵ = p₀/(2*N);
+                μ = (1-p₀)(N-1)/N^2;
+                return convert(Double64,(N-(n+1))*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
+            elseif length(pars)==2
+                ϵ = pars[1];
+                μ = pars[2];
+                return convert(Double64,(N-(n+1))*ϵ+μ*(n+1)*(N-(n+1))*(1+(N-(n+1))/(N-1))/(N-1))::Double64
+            else
+                error("length of pars must be 1 or 2 for the voter models")
+            end
+        elseif model_type == "brock"
+            if length(pars)==5
+                α = pars[1];
+                β = pars[2];
+                γ = pars[3];
+                F = pars[4];
+                J = pars[5];
+                mn = (2*(n+1)-N)/N;
+                return convert(Double64,(N-(n+1))*γ/(1+exp(-β*(F+J*(α+1)*mn))))
+            else
+                error("length of pars must be 5 for the brock and durlauf model")
+            end
         else
-            error("length of pars must be 2, 3 or 4.")
+            error("chosen model type is not recognised")
         end
     end
 
@@ -89,26 +148,55 @@ module BDMAnalytic
     """
     Get eigenvalues
     """
-    function GetEigVals(A::Matrix{Float64},pars::Vector{Float64},N::Int64)
-        if length(pars)==2
-            ϵ = pars[1];
-            μ = pars[2];
-            λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
-            return convert(Array{Complex{Double64}},λ)
-        elseif length(pars)==3
-            ϵ1 = pars[1];
-            ϵ2 = pars[2]
-            μ = pars[3];
-            λ = [-(m-1)*(ϵ1+ϵ2+(m-2)μ/(N-1)) for m in 1:N+1];
-            return convert(Array{Complex{Double64}},λ)
-        elseif length(pars)==4
-            λ = convert(Array{Complex{Double64}}, reverse(eigvals(A)));
-            if λ[1] == λ[2] # if get repeated zero eigenvalues from solver manually separate.
-                λ[1] = 0.0 + (1E-30)im; λ[2] = 0.0 - (1E-30)im;
+    function GetEigVals(A::Matrix{Float64},pars::Vector{Float64},N::Int64,model_type::String)
+        if model_type == "ant"
+            if length(pars)==2
+                ϵ = pars[1];
+                μ = pars[2];
+                λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
+                return convert(Array{Complex{Double64}},λ)
+            elseif length(pars)==3
+                ϵ1 = pars[1];
+                ϵ2 = pars[2]
+                μ = pars[3];
+                λ = [-(m-1)*(ϵ1+ϵ2+(m-2)μ/(N-1)) for m in 1:N+1];
+                return convert(Array{Complex{Double64}},λ)
+            elseif length(pars)==4
+                λ = convert(Array{Complex{Double64}}, reverse(eigvals(A)));
+                if λ[1] == λ[2] # if get repeated zero eigenvalues from solver manually separate.
+                    λ[1] = 0.0 + (1E-30)im; λ[2] = 0.0 - (1E-30)im;
+                end
+                return λ::Array{Complex{Double64}}
+            else
+                error("length of pars must be 2, 3 or 4.")
             end
-            return λ::Array{Complex{Double64}}
-        else
-            error("length of pars must be 2, 3 or 4.")
+        elseif model_type == "voter"
+            if length(pars)==1
+                p₀ = pars[1];
+                ϵ = p₀/(2*N);
+                μ = (1-p₀)(N-1)/N^2;
+                λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
+                return convert(Array{Complex{Double64}},λ)
+            elseif length(pars)==2
+                ϵ = pars[1];
+                μ = pars[2];
+                λ = [-(m-1)*(2*ϵ+(m-2)μ/(N-1)) for m in 1:N+1];
+                return convert(Array{Complex{Double64}},λ)
+            else
+                error("length of pars must be 1 or 2 for voter models")
+            end
+        elseif model_type == "brock"
+            if length(pars)==5
+                α = pars[1];
+                β = pars[2];
+                γ = pars[3];
+                F = pars[4];
+                J = pars[5];
+                λ = [-(m-1)*(N-β*J*(α+1)*(2+N-m))*γ/N for m in 1:N+1];
+                return convert(Array{Complex{Double64}},λ)
+            else
+                error("length of pars must be 5 for brock model")
+            end
         end
     end
 
