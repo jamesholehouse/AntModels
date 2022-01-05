@@ -100,11 +100,11 @@ module BDMAnalytic
                 p₀ = pars[1];
                 ϵ = p₀/(2*N);
                 μ = (1-p₀)*(N-1)/N^2;
-                return convert(Double64,(N-(n+1))*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
+                return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
             elseif length(pars)==2
                 ϵ = pars[1];
                 μ = pars[2];
-                return convert(Double64,(N-(n+1))*ϵ+μ*(n+1)*(N-(n+1))*(1+(N-(n+1))/(N-1))/(N-1))::Double64
+                return convert(Double64,(n+1)*ϵ+μ*(n+1)*(N-(n+1))*(1+(N-(n+1))/(N-1))/(N-1))::Double64
             else
                 error("length of pars must be 1 or 2 for the voter models")
             end
@@ -116,7 +116,7 @@ module BDMAnalytic
                 F = pars[4];
                 J = pars[5];
                 mn = (2*(n+1)-N)/N;
-                return convert(Double64,(N-(n+1))*γ/(1+exp(-β*(F+J*(α+1)*mn))))
+                return convert(Double64,(n+1)*γ/(1+exp(-β*(F+J*(α+1)*mn))))
             else
                 error("length of pars must be 5 for the brock and durlauf model")
             end
