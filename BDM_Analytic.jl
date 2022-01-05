@@ -198,7 +198,7 @@ module BDMAnalytic
         end
         ps[1] = prod(Bs[1:N]) # do product for the B's
         ps[N+1] = prod(As[1:N]) # do product for the A's
-        return (LinRange(-1.0,1.0,N+1),ps/sum(ps))::Tuple{LinRange{Float64}, Vector{Double64}}
+        return (LinRange(-1.0,1.0,N+1),N.*ps/sum(ps))::Tuple{LinRange{Float64}, Vector{Double64}}
     end
 
 end # module end
