@@ -19,7 +19,7 @@ module BDMAnalytic
         p_arr::Vector{Vector{Complex{Double64}}} = [GetOrthoP(pars,N,λ[j]) for j in 1:N+1];
         den_prod::Vector{Complex{Double64}} = [prod([λ[i]-λ[j] for j in filter!(e->e≠i,[j for j in 1:N+1])]) for i in 1:N+1];
         As::Vector{Double64} = [a(pars,N,j,model_type) for j in 1:N];
-        Bs::Vector{Double64} = [b(pars,N,j) for j in 0:N-1];
+        Bs::Vector{Double64} = [b(pars,N,j,model_type) for j in 0:N-1];
     end
 
     """
