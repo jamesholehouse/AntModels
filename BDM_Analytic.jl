@@ -46,7 +46,7 @@ module BDMAnalytic
             if length(pars)==1
                 p₀ = pars[1];
                 ϵ = p₀/(2*N);
-                μ = (1-p₀)(N-1)/N^2;
+                μ = (1-p₀)*(N-1)/N^2;
                 return convert(Double64,(N-(n-1))*ϵ+μ*(n-1)*(N-(n-1))/(N-1))::Double64
             elseif length(pars)==2
                 ϵ = pars[1];
@@ -96,7 +96,7 @@ module BDMAnalytic
             if length(pars)==1
                 p₀ = pars[1];
                 ϵ = p₀/(2*N);
-                μ = (1-p₀)(N-1)/N^2;
+                μ = (1-p₀)*(N-1)/N^2;
                 return convert(Double64,(N-(n+1))*ϵ+μ*(n+1)*(N-(n+1))/(N-1))::Double64
             elseif length(pars)==2
                 ϵ = pars[1];
