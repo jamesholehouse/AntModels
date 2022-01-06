@@ -58,7 +58,7 @@ module BDMAnalytic
             else
                 error("length of pars must be 1 or 2 for the voter models")
             end
-        elseif model_type == "brock"
+        elseif model_type == "brock_exact" || model_type == "brock"
             if length(pars)==5
                 α = pars[1];
                 β = pars[2];
@@ -108,7 +108,7 @@ module BDMAnalytic
             else
                 error("length of pars must be 1 or 2 for the voter models")
             end
-        elseif model_type == "brock"
+        elseif model_type == "brock_exact" || model_type == "brock"
             if length(pars)==5
                 α = pars[1];
                 β = pars[2];
@@ -116,7 +116,7 @@ module BDMAnalytic
                 F = pars[4];
                 J = pars[5];
                 mn = (2*(n+1)-N)/N;
-                return convert(Double64,(n+1)*γ/(1+exp(-β*(F+J*(α+1)*mn))))
+                return convert(Double64,(n+1)*γ/(1+exp(β*(F+J*(α+1)*mn))))
             else
                 error("length of pars must be 5 for the brock and durlauf model")
             end
@@ -198,6 +198,16 @@ module BDMAnalytic
                 J = pars[5];
                 λ = [-(m-1)*(N-β*J*(α+1)*(2+N-m))*γ/N for m in 1:N+1];
                 return convert(Array{Complex{Double64}},λ)
+            else
+                error("length of pars must be 5 for brock model")
+            end
+        elseif model_type == "brock_exact"
+            if length(pars)==5
+                λ = convert(Array{Complex{Double64}}, reverse(eigvals(A)));
+                if λ[1] == λ[2] # if get repeated zero eigenvalues from solver manually separate.
+                    λ[1] = 0.0 + (1E-30)im; λ[2] = 0.0 - (1E-30)im;
+                end
+                return λ::Array{Complex{Double64}}
             else
                 error("length of pars must be 5 for brock model")
             end
