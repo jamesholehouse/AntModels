@@ -269,7 +269,8 @@ module BDMAnalytic
         for i in 1:N+1 # loop over the m0's
             pmt[i] = sum([q_init[n+1]*pm(t, BD, i-1, n) for n in 0:N])
         end
-        return (LinRange(-1.0,1.0,N+1),real(pmt))::Tuple{LinRange{Float64}, Vector{Double64}}
+        norm = sum(real(pmt))/N
+        return (LinRange(0.0,1.0,N+1),real(pmt)/norm)::Tuple{LinRange{Float64}, Vector{Double64}}
     end
 
     """
@@ -277,7 +278,8 @@ module BDMAnalytic
     """
     function prob(BD::BDM, t::Float64, m₀::Int64)
         @unpack N = BD
-        return (LinRange(-1.0,1.0,N+1),real([pm(t, BD, m, m₀) for m in 0:N]))::Tuple{LinRange{Float64}, Vector{Double64}}
+        norm = sum(real([pm(t, BD, m, m₀) for m in 0:N]))/N
+        return (LinRange(0.0,1.0,N+1),real([pm(t, BD, m, m₀) for m in 0:N])/norm)::Tuple{LinRange{Float64}, Vector{Double64}}
     end
 
     """
@@ -286,7 +288,8 @@ module BDMAnalytic
     function prob(BD::BDM, t::Float64)
         @unpack N = BD
         m₀ = floor(Int64,N/2) # note that we have the n=0 state too.
-        return (LinRange(-1.0,1.0,N+1),real([pm(t, BD, m, m₀) for m in 0:N]))::Tuple{LinRange{Float64}, Vector{Double64}}
+        norm = sum(real([pm(t, BD, m, m₀) for m in 0:N]))/N
+        return (LinRange(0.0,1.0,N+1),real([pm(t, BD, m, m₀) for m in 0:N])/norm)::Tuple{LinRange{Float64}, Vector{Double64}}
     end
 
     """
@@ -300,7 +303,7 @@ module BDMAnalytic
         end
         ps[1] = prod(Bs[1:N]) # do product for the B's
         ps[N+1] = prod(As[1:N]) # do product for the A's
-        return (LinRange(-1.0,1.0,N+1),N.*ps/sum(ps))::Tuple{LinRange{Float64}, Vector{Double64}}
+        return (LinRange(0.0,1.0,N+1),N.*ps/sum(ps))::Tuple{LinRange{Float64}, Vector{Double64}}
     end
 
 end # module end

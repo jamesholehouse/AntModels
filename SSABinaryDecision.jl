@@ -108,7 +108,7 @@ module BinaryDecSSA
                 # update the time.
                 τ += u;
             end
-            ens_store[it] = (2.0 .* store .- N) ./ N; # return the value of m not N₊
+            ens_store[it] = store ./ N; # return the value of m not N₊
         end
         return (reverse(times),ens_store)
     end
@@ -141,8 +141,8 @@ module BinaryDecSSA
         @unpack BD = ens;
         @unpack N = BD;
         ns = convert(Matrix{Float64},transpose(cat(ens.sims[2]...,dims=2)))
-        mod_bins = LinRange(-1.0-(1/N),1.0+(1/N),N+2);
-        mid_pts = LinRange(-1.0,1.0,N+1);
+        mod_bins = LinRange(0.0-(1/N),1.0+(1/N),N+2);
+        mid_pts = LinRange(0.0,1.0,N+1);
         bin_vals = normalize(fit(Histogram, ns[:,T], mod_bins), mode=:probability).weights;
         return (mid_pts, bin_vals.*N)
     end
